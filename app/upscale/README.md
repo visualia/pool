@@ -22,8 +22,8 @@ for m in real_esrgan_general_x4v3 real_esrgan_x4plus; do
   unzip -oq $m-onnx-float.zip -d $m
 done
 shasum -a 256 *.zip
-# fc094329…c7cf  real_esrgan_general_x4v3-onnx-float.zip
-# 05aa3132…4ca4  real_esrgan_x4plus-onnx-float.zip
+# fc094329b24a00c936ebc1cc4c51bc59633e7dc36f4a553344342171cbd3c7cf  real_esrgan_general_x4v3-onnx-float.zip
+# 05aa31323c6a7e831493171cac970e398697709cae7e7ae8e0760e6da4d64ca4  real_esrgan_x4plus-onnx-float.zip
 ```
 
 ## Build for tabs, publish the weights

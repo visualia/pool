@@ -34,6 +34,21 @@ jobs:
         working-directory: app
     steps:
       - uses: actions/checkout@v5
+      # The upscaler is generated from two ONNX files at build time (upscale/README.md), pinned by SHA-256.
+      - name: Fetch the upscaler's ONNX files
+        shell: pwsh
+        working-directory: app/upscale
+        run: |
+          $want = @{ 'real_esrgan_general_x4v3' = 'fc094329b24a00c936ebc1cc4c51bc59633e7dc36f4a553344342171cbd3c7cf';
+                    'real_esrgan_x4plus' = '05aa31323c6a7e831493171cac970e398697709cae7e7ae8e0760e6da4d64ca4' }
+          New-Item -ItemType Directory -Force models | Out-Null
+          foreach ($m in $want.Keys) {
+            $zip = "models/$m.zip"
+            Invoke-WebRequest "https://qaihub-public-assets.s3.us-west-2.amazonaws.com/qai-hub-models/models/$m/releases/v0.66.0/$m-onnx-float.zip" -OutFile $zip
+            $got = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()
+            if ($got -ne $want[$m]) { throw "$m: SHA-256 $got, expected $($want[$m])" }
+            Expand-Archive $zip -DestinationPath "models/$m" -Force
+          }
       - run: cargo build --release -p pool-core
       - run: cargo build --release -p visualia-pool
       - uses: actions/upload-artifact@v4
