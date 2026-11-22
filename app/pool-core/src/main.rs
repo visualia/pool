@@ -54,8 +54,14 @@ async fn main() {
     }
     let (stop, stopped) = tokio::sync::watch::channel(false);
     tokio::spawn(async move {
-        let mut term = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate()).unwrap();
-        tokio::select! { _ = tokio::signal::ctrl_c() => {}, _ = term.recv() => {} }
+        // Ctrl+C everywhere; SIGTERM (log-out, a service manager) where there is one.
+        #[cfg(unix)]
+        {
+            let mut term = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate()).unwrap();
+            tokio::select! { _ = tokio::signal::ctrl_c() => {}, _ = term.recv() => {} }
+        }
+        #[cfg(not(unix))]
+        let _ = tokio::signal::ctrl_c().await;
         let _ = stop.send(true);
     });
     native::run(cfg, None, stopped).await;
