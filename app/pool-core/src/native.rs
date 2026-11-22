@@ -680,6 +680,12 @@ async fn chat(w: &Worker, job: &Job, tag: &str, send: &impl Fn(String), pieces: 
 // A decision: state + typed questions -> answers, one JSON reply. The model
 // loads on demand (Clef-flash cold: 6-18 s on the M1).
 async fn decide(w: &Worker, job: &Job, tag: &str) -> Result<Done, String> {
+    // An older Ollama has no /v1/systemone: say so, and the gateway asks elsewhere.
+    if let Some(v) = ollama_version(&w.http, &w.cfg.ollama).await {
+        if !core::version_at_least(&v, core::OLLAMA_MIN) {
+            return Err(format!("Ollama {v} is older than {}, which decisions need", core::OLLAMA_MIN));
+        }
+    }
     let res = w.http.post(format!("{}/v1/systemone", w.cfg.ollama))
         .json(&json!({ "model": tag, "state": job.state, "questions": job.questions }))
         .send().await.map_err(|e| e.to_string())?;

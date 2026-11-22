@@ -257,6 +257,25 @@ pub struct Model {
     pub cutout: bool,
 }
 
+// Decisions use Ollama's /v1/systemone, which needs this version or newer.
+pub const OLLAMA_MIN: &str = "0.35.1";
+
+// "0.36.0" >= "0.35.1"; a suffix such as "-rc1" is ignored, a missing part counts as 0.
+pub fn version_at_least(version: &str, min: &str) -> bool {
+    let parts = |s: &str| -> Vec<u64> {
+        let core = s.trim().trim_start_matches('v').split(|c| c == '-' || c == '+').next().unwrap_or("");
+        core.split('.').map(|p| p.parse().unwrap_or(0)).collect()
+    };
+    let (a, b) = (parts(version), parts(min));
+    for i in 0..a.len().max(b.len()) {
+        let (x, y) = (a.get(i).copied().unwrap_or(0), b.get(i).copied().unwrap_or(0));
+        if x != y {
+            return x > y;
+        }
+    }
+    true
+}
+
 // How a picture model is run (sd-cli's options), from the pool's list.
 #[derive(Clone, Debug, PartialEq)]
 pub struct ImageSettings {
@@ -451,6 +470,17 @@ pub fn joules(j: Option<f64>) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn ollama_versions() {
+        assert!(version_at_least("0.35.1", OLLAMA_MIN));
+        assert!(version_at_least("0.36.0", OLLAMA_MIN));
+        assert!(version_at_least("1.0", OLLAMA_MIN));
+        assert!(version_at_least("0.35.2-rc0", OLLAMA_MIN));
+        assert!(!version_at_least("0.35.0", OLLAMA_MIN));
+        assert!(!version_at_least("0.9.9", OLLAMA_MIN));
+        assert!(!version_at_least("0.34.10", OLLAMA_MIN));
+    }
 
     #[test]
     fn cutouts() {

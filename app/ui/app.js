@@ -16,6 +16,8 @@ async function check() {
   spaced($('machine'), [c.chip ?? '', t('memory', { gb: c.memory_gb ?? '?' }), c.mlx ? t('mlx') : '']);
   ready = !!c.ready;
   if (c.ollama) { models = c.models; drawModels(); }
+  $('ollama-old').hidden = !c.ollama_old;
+  if (c.ollama_old) $('ollama-old').textContent = t('ollama-old', { version: c.version, min: c.ollama_min });
   if (!inPool) {
     $('toggle').disabled = !ready;
     $('status').textContent = !c.ollama ? '' : ready ? t('not-in-pool') : t('get-model-first');

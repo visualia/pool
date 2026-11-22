@@ -185,7 +185,8 @@ async fn check(app: AppHandle, state: State<'_, Worker>) -> Result<serde_json::V
     for m in &list {
         if is_here(&m.tag) && native::ollama_runner(&http, OLLAMA, &m.tag).await.as_deref() == Some("mlx") { mlx = true; }
     }
-    Ok(serde_json::json!({ "ollama": true, "version": version, "memory_gb": memory, "chip": chip_name(), "mlx": mlx, "models": models, "ready": ready }))
+    let old = !core::version_at_least(&version, core::OLLAMA_MIN);
+    Ok(serde_json::json!({ "ollama": true, "version": version, "ollama_old": old, "ollama_min": core::OLLAMA_MIN, "memory_gb": memory, "chip": chip_name(), "mlx": mlx, "models": models, "ready": ready }))
 }
 
 // Where the app keeps files from the pool (the upscalers' and picture models' weights).

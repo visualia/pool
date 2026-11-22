@@ -3,6 +3,7 @@
   "intro": "Share this computer with the pool. While you are in, it does AI work for everyone in the pool.",
   "needs-ollama": "This app needs Ollama, a free program that runs the models.",
   "get-ollama": "Get Ollama",
+  "ollama-old": "This computer has Ollama {version}. Decision work needs {min} or newer, so update Ollama.",
   "check-again": "Check again",
   "models": "Models",
   "for-qwen3.5-9b": "Chat, also in Estonian.",
