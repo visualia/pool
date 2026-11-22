@@ -3,6 +3,7 @@
   // per school. Workers (browser tabs) connect out to it by WebSocket; the
   // gateway reaches it only through a service binding (entrypoint ForGateway).
   "name": "visualia-pool",
+  "account_id": "dc1ee8d72a1fb7da857c46479a8503b8",
   "main": "src/index.js",
   "workers_dev": false,
   "compatibility_date": "2026-10-01",
