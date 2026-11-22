@@ -91,7 +91,32 @@ fn listed(state: &Worker) -> Vec<core::Model> {
     list
 }
 
+// Windows: one PowerShell expression, no console window, its output trimmed. Rough and slow
+// (about a second), so only for the first screen and Check again.
+#[cfg(windows)]
+fn powershell(expr: &str) -> Option<String> {
+    use std::os::windows::process::CommandExt;
+    let out = std::process::Command::new("powershell")
+        .args(["-NoProfile", "-NonInteractive", "-Command", expr])
+        .creation_flags(0x0800_0000) // CREATE_NO_WINDOW
+        .output()
+        .ok()?;
+    let s = String::from_utf8_lossy(&out.stdout).trim().to_string();
+    (!s.is_empty()).then_some(s)
+}
+
+// The home folder: HOME on a Mac, USERPROFILE on Windows.
+fn home() -> Option<std::path::PathBuf> {
+    std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")).map(Into::into)
+}
+
 // Free disk where Ollama keeps models by default (the home folder's volume), in GB.
+#[cfg(windows)]
+fn free_disk_gb() -> Option<f64> {
+    let bytes: f64 = powershell("(Get-PSDrive $env:USERPROFILE.Substring(0,1)).Free")?.parse().ok()?;
+    Some(bytes / 1e9)
+}
+#[cfg(not(windows))]
 fn free_disk_gb() -> Option<f64> {
     let home = std::env::var("HOME").ok()?;
     let out = std::process::Command::new("/bin/df").args(["-k", "-P", &home]).output().ok()?;
@@ -100,14 +125,26 @@ fn free_disk_gb() -> Option<f64> {
     Some(kb * 1024.0 / 1e9)
 }
 
-// The computer's memory in GB (macOS: hw.memsize; elsewhere unknown for now).
+// The computer's memory in GB (macOS: hw.memsize; Windows: Win32_ComputerSystem).
+#[cfg(windows)]
+fn memory_gb() -> Option<u64> {
+    let bytes: f64 = powershell("(Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory")?.parse().ok()?;
+    Some((bytes / 1024f64.powi(3)).round() as u64)
+}
+#[cfg(not(windows))]
 fn memory_gb() -> Option<u64> {
     let out = std::process::Command::new("/usr/sbin/sysctl").args(["-n", "hw.memsize"]).output().ok()?;
     let bytes: u64 = String::from_utf8_lossy(&out.stdout).trim().parse().ok()?;
     Some((bytes as f64 / 1024f64.powi(3)).round() as u64)
 }
 
-// The chip's name, e.g. "Apple M1 Pro" (macOS; elsewhere unknown for now).
+// The chip's name, e.g. "Apple M1 Pro"; on Windows the processor and the graphics cards,
+// e.g. "Intel Core i9-14900K, NVIDIA GeForce RTX 4080".
+#[cfg(windows)]
+fn chip_name() -> Option<String> {
+    powershell("(@((Get-CimInstance Win32_Processor).Name) + @((Get-CimInstance Win32_VideoController).Name) | ForEach-Object { $_.Trim() }) -join ', '")
+}
+#[cfg(not(windows))]
 fn chip_name() -> Option<String> {
     let out = std::process::Command::new("/usr/sbin/sysctl").args(["-n", "machdep.cpu.brand_string"]).output().ok()?;
     let name = String::from_utf8_lossy(&out.stdout).trim().to_string();
@@ -161,7 +198,7 @@ fn files_dir(app: &AppHandle) -> Option<std::path::PathBuf> {
 // picture model only when this runs and the model's weights are downloaded.
 fn sd_cli() -> Option<std::path::PathBuf> {
     if let Ok(p) = std::env::var("SD_CLI") { return Some(p.into()); }
-    let p = std::path::PathBuf::from(std::env::var("HOME").ok()?).join(".visualia/sd-cli");
+    let p = home()?.join(".visualia").join(if cfg!(windows) { "sd-cli.exe" } else { "sd-cli" });
     p.is_file().then_some(p)
 }
 
@@ -332,6 +369,19 @@ fn set_autostart(app: AppHandle, on: bool) -> Result<bool, String> {
 
 // Off where IT manages the app: `defaults write space.visualia.pool Updates off`,
 // or the same key in a managed profile (MDM). Then the app never looks.
+// Windows: the string value Updates = off under HKLM or HKCU\SOFTWARE\Policies\Visualia\Pool (Group Policy, Intune).
+#[cfg(windows)]
+fn updates_off() -> bool {
+    use std::os::windows::process::CommandExt;
+    ["HKLM", "HKCU"].iter().any(|hive| {
+        std::process::Command::new("reg")
+            .args(["query", &format!("{hive}\\SOFTWARE\\Policies\\Visualia\\Pool"), "/v", "Updates"])
+            .creation_flags(0x0800_0000)
+            .output()
+            .is_ok_and(|o| String::from_utf8_lossy(&o.stdout).split_whitespace().last().is_some_and(|v| v.eq_ignore_ascii_case("off")))
+    })
+}
+#[cfg(not(windows))]
 fn updates_off() -> bool {
     std::process::Command::new("/usr/bin/defaults").args(["read", SERVICE, "Updates"]).output()
         .is_ok_and(|o| String::from_utf8_lossy(&o.stdout).trim().eq_ignore_ascii_case("off"))

@@ -73,8 +73,9 @@ JSON text frames. `"ping"` gets `"pong"` without waking the pool. `id` ties a jo
 
 ### Energy
 
-A worker that measures energy (the app and the CLI, through macmon) adds to `usage`: `energy_j`, `energy_net_j`,
-`sys_energy_j` (joules) and `energy_source` (`'macmon'`). These, with the model, tokens and time, are what ends up in
+A worker that measures energy adds to `usage`: `energy_j`, `energy_net_j`, `sys_energy_j` (joules) and
+`energy_source`: `'macmon'` on a Mac (the chip, and the whole computer), `'nvidia-smi'` elsewhere (roughly: the
+NVIDIA card's power draw alone, so the chip and system figures are the same). These, with the model, tokens and time, are what ends up in
 the school's usage rows. The prompt and the answer pass through the pool's memory to one worker and back, and are not
 stored by the pool.
 

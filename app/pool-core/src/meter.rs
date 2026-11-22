@@ -4,7 +4,9 @@
 //   chip = all_power + ram_power + gpu_ram_power, summed over each job
 //   net  = chip minus the idle baseline (a moving average while no job runs)
 //   sys  = the whole computer
-// Not a Mac, or the counters can't be read: energy stays unknown, jobs still run.
+// Elsewhere, roughly: an NVIDIA graphics card through nvidia-smi (GPU 0's power
+// draw, temperature and graphics memory), so chip and sys are both the GPU alone.
+// Neither works: energy stays unknown, jobs still run.
 use crate::core::Energy;
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -86,7 +88,7 @@ impl Meter {
             energy_j: round(chip),
             energy_net_j: round((chip - st.idle_w.unwrap_or(0.0) * secs).max(0.0)),
             sys_energy_j: round(sys),
-            source: "macmon".into(),
+            source: SOURCE.into(),
         })
     }
 
@@ -149,9 +151,50 @@ fn sampler() -> Option<impl FnMut() -> Option<Sample>> {
     })
 }
 
+#[cfg(target_os = "macos")]
+const SOURCE: &str = "macmon";
 #[cfg(not(target_os = "macos"))]
-fn sampler() -> Option<fn() -> Option<Sample>> {
-    None
+const SOURCE: &str = "nvidia-smi";
+
+// One nvidia-smi for the whole run, printing a line every INTERVAL_MS; killed with the sampler.
+#[cfg(not(target_os = "macos"))]
+fn sampler() -> Option<impl FnMut() -> Option<Sample>> {
+    use std::io::{BufRead, BufReader};
+    use std::process::{Command, Stdio};
+    let mut cmd = Command::new("nvidia-smi");
+    cmd.args(["--id=0", "--query-gpu=power.draw,temperature.gpu,memory.used,memory.total", "--format=csv,noheader,nounits"])
+        .arg(format!("--loop-ms={INTERVAL_MS}"))
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null());
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x0800_0000); // CREATE_NO_WINDOW
+    }
+    let mut smi = Smi(cmd.spawn().ok()?);
+    let mut lines = BufReader::new(smi.0.stdout.take()?).lines();
+    Some(move || {
+        let _alive = &smi;
+        let line = lines.next()?.ok()?;
+        let v: Vec<f64> = line.split(',').map(|x| x.trim().parse().unwrap_or(f64::NAN)).collect();
+        let (watts, c, used, total) = (*v.first()?, *v.get(1)?, *v.get(2)?, *v.get(3)?);
+        if !watts.is_finite() {
+            return None; // this card reports no power draw
+        }
+        let mib = |x: f64| if x.is_finite() { x * 1024.0 * 1024.0 } else { 0.0 };
+        Some(Sample { chip: watts, sys: watts, cpu_c: None, gpu_c: c.is_finite().then_some(c), mem_used: mib(used), mem_total: mib(total) })
+    })
+}
+
+#[cfg(not(target_os = "macos"))]
+struct Smi(std::process::Child);
+#[cfg(not(target_os = "macos"))]
+impl Drop for Smi {
+    fn drop(&mut self) {
+        let _ = self.0.kill();
+        let _ = self.0.wait();
+    }
 }
 
 // On a Mac: the counters are read in-process, with no macmon installed.
