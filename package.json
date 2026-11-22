@@ -1,0 +1,19 @@
+{
+  "name": "visualia-pool",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "worker",
+    "app"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "wrangler": "4.151.3"
+  },
+  "overrides": {
+    "esbuild": "0.28.1",
+    "workerd": "1.20260701.1"
+  }
+}

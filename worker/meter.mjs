@@ -1,5 +1,5 @@
 // Energy per job on Apple Silicon with macmon (power counters, no sudo), the
-// same method as apps/m1-worker/proxy.mjs:
+// same method as visualia-research/m1-worker/proxy.mjs:
 //   energy_j      chip energy (CPU + GPU + Neural Engine + memory) during the job
 //   energy_net_j  the same minus the chip's idle baseline: what the model used
 //   sys_energy_j  whole-system energy (includes display, SSD, everything else)
@@ -78,8 +78,8 @@ if (import.meta.main) {
   const runs = Number(process.argv[3] ?? 3);
   const OLLAMA = process.env.OLLAMA ?? 'http://127.0.0.1:11434';
   // Run 6's prompt: the stones brief with the course instructions, 1,000 tokens out.
-  const system = readFileSync(new URL('../../schools/eka/instructions.md', import.meta.url), 'utf8');
-  const brief = JSON.parse(readFileSync(new URL('../../evals/first-pages/briefs.json', import.meta.url), 'utf8'))
+  const system = readFileSync(process.env.INSTRUCTIONS ?? new URL('../../visualia/schools/eka/instructions.md', import.meta.url), 'utf8');
+  const brief = JSON.parse(readFileSync(process.env.BRIEFS ?? new URL('../../visualia-research/evals/first-pages/briefs.json', import.meta.url), 'utf8'))
     .find((b) => b.id === 'kivid').brief;
   const m = meter();
   const ask = async (max_tokens) => {

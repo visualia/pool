@@ -9,21 +9,21 @@ from the R2 bucket `visualia-pool-app`, without sign-in (the app checks each
 update's signature against its own key):
 `GET /app/update/<target>/<arch>/<version>` answers with the manifest when a
 newer version exists, else 204; `GET /app/files/<name>` is the update itself.
-Published by `apps/pool-app/publish-update.mjs`. `GET /app/models` sends
+Published by `app/publish-update.mjs`. `GET /app/models` sends
 the app's model list (`src/models.js`); the app checks it against limits of
 its own and downloads only on a click.
 
 ## Running a computer with Ollama as a worker
 
-The worker is the Rust program and app in `apps/pool-app`
+The worker is the Rust program and app in `app`
 (`visualia-pool-cli`, 1.3 MB, and the Visualia Pool app around it). The Node
 script `worker-node.mjs` that did the same for the work Mac while ThreatLocker
 killed new binaries was retired on 2026-11-02 (in git history before that).
 `meter.mjs` stays here: the evals measure energy with it.
 
 ```sh
-cd apps/pool-app && cargo build --release -p pool-core
-VISUALIA_KEY=$(grep '^eka-teacher=' ../../.keys.local | cut -d= -f2-) target/release/visualia-pool-cli
+cd app && cargo build --release -p pool-core
+VISUALIA_KEY=$(grep '^eka-teacher=' ../../visualia/.keys.local | cut -d= -f2-) target/release/visualia-pool-cli
 ```
 
 (Reading the key from `.keys.local` keeps it out of the shell history.)
@@ -62,7 +62,7 @@ VISUALIA_KEY=$(grep '^eka-teacher=' ../../.keys.local | cut -d= -f2-) target/rel
 a running job is stopped and the cloud finishes it. Revoking the course key
 stops it at its next connect; blocking `pool.visualia.space` stops it for good.
 
-The M1 runs it as a LaunchAgent: `apps/m1-worker/README.md`.
+The M1 runs it as a LaunchAgent: `visualia-research/m1-worker/README.md`.
 
 Measure a model's energy on a fixed prompt: `node meter.mjs [model] [runs]`
 (waits a minute and for the GPU to be under 60 °C before each run).

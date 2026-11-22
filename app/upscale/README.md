@@ -16,7 +16,7 @@ Qualcomm AI Hub's float ONNX exports, release v0.66.0 (input 1×3×128×128 in
 0..1, but any size works):
 
 ```sh
-cd apps/pool-app/upscale && mkdir -p models && cd models
+cd app/upscale && mkdir -p models && cd models
 for m in real_esrgan_general_x4v3 real_esrgan_x4plus; do
   curl -sLO "https://qaihub-public-assets.s3.us-west-2.amazonaws.com/qai-hub-models/models/$m/releases/v0.66.0/$m-onnx-float.zip"
   unzip -oq $m-onnx-float.zip -d $m
@@ -29,8 +29,8 @@ shasum -a 256 *.zip
 ## Build for tabs, publish the weights
 
 ```sh
-./build-web.sh   # WebAssembly + glue into apps/pool/public/upscale/, weights into weights/
-node publish-weights.mjs            # R2 visualia-pool-app/files/<name> (checks the SHA-256s in apps/pool/src/models.js)
+./build-web.sh   # WebAssembly + glue into worker/public/upscale/, weights into weights/
+node publish-weights.mjs            # R2 visualia-pool-app/files/<name> (checks the SHA-256s in worker/src/models.js)
 node publish-weights.mjs --local --persist-to <dir>   # wrangler dev's R2
 ```
 

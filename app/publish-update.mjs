@@ -5,7 +5,7 @@
 //
 //   node publish-update.mjs [--debug] [--local] [--notes "what changed"]
 //
-// --local writes to `wrangler dev`'s R2 instead (apps/pool, port 8787), for tests;
+// --local writes to `wrangler dev`'s R2 instead (worker, port 8787), for tests;
 // VERSION=x.y.z names a build made with `--config '{"version":"x.y.z"}'`.
 //
 // Build first with the update key in the environment (never in the repo):
@@ -30,7 +30,7 @@ const bundle = join(here, `target/${debug ? 'debug' : 'release'}/bundle/macos/Vi
 const signature = readFileSync(`${bundle}.sig`, 'utf8').trim();
 const name = `visualia-pool-${version}-${platform}.app.tar.gz`;
 
-// wrangler runs from apps/pool, whose wrangler.jsonc names the bucket.
+// wrangler runs from worker, whose wrangler.jsonc names the bucket.
 const put = (key, file, type) => execFileSync('npx', ['wrangler', 'r2', 'object', 'put', `${BUCKET}/${key}`, '--file', file, '--content-type', type, local ? '--local' : '--remote'],
   { cwd: join(here, '../pool'), stdio: ['ignore', 'ignore', 'inherit'] });
 

@@ -16,7 +16,7 @@ src-tauri/   the app: a window (ui/, our HTML + visualia.css) around the same co
 Build on a Mac with Rust (rustup) and Node (for the Tauri CLI only):
 
 ```sh
-cd apps/pool-app
+cd app
 cargo build -p pool-core --release      # target/release/visualia-pool-cli (1.3 MB)
 npm install && npm run build         # target/release/bundle/macos/Visualia Pool.app (4.2 MB)
 cargo test -p pool-core --no-default-features
@@ -59,9 +59,9 @@ means installed apps can't update again (a new key needs a manual reinstall).
 Debug builds only: `VISUALIA_TEST_UPDATE=1` installs a found update without a
 click. To test without the live pool, build with
 `--debug --config '{"version":"0.2.90","plugins":{"updater":{"endpoints":["http://127.0.0.1:8787/app/update/{{target}}/{{arch}}/{{current_version}}"],"dangerousInsecureTransportProtocol":true}}}'`
-against `wrangler dev` in `apps/pool`, and publish with `--debug --local`.
+against `wrangler dev` in `worker`, and publish with `--debug --local`.
 
 **Audit**: `pool-core/src/` (what runs and what it talks to),
 `src-tauri/capabilities/default.json` (what the window may ask for),
 `src-tauri/tauri.conf.json` (the window's Content Security Policy),
-`apps/pool/README.md` (what a computer in the pool never does).
+`worker/README.md` (what a computer in the pool never does).

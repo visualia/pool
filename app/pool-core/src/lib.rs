@@ -1,4 +1,4 @@
-// Visualia Pool's shared code (plans/pool.md, plans/worker-app.md; the app is apps/pool-app).
+// Visualia Pool's shared code (plans/pool.md, plans/worker-app.md; the app is app).
 //   core    decisions only, no I/O (also builds for wasm32)
 //   native  the talking: pool, Ollama, macmon (meter)
 //   cutout  background removal with ONNX Runtime (feature `cutout`)

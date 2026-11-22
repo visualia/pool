@@ -1,6 +1,6 @@
 // Energy per job on Apple Silicon with macmon's library (IOReport power
 // counters, SMC temperatures, no sudo, nothing to install), the same method
-// as apps/pool/meter.mjs:
+// as worker/meter.mjs:
 //   chip = all_power + ram_power + gpu_ram_power, summed over each job
 //   net  = chip minus the idle baseline (a moving average while no job runs)
 //   sys  = the whole computer

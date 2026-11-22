@@ -1,0 +1,9 @@
+node_modules/
+.wrangler/
+.dev.vars
+.env*
+.DS_Store
+worker/public/visualia.css
+worker/public/pool.css
+worker/public/text.js
+worker/public/upscale/

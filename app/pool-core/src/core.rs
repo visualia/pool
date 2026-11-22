@@ -233,7 +233,7 @@ pub fn usage(prompt_tokens: Option<u64>, completion_tokens: Option<u64>, energy:
 
 // ---- the model list -----------------------------------------------------------------
 // One list says what the app can download and what it serves to the pool. The
-// pool sends it (GET /app/models, apps/pool/src/models.js), so models can change
+// pool sends it (GET /app/models, worker/src/models.js), so models can change
 // without an app update; the copy below is used when the pool can't be reached.
 // Whatever the pool sends must pass the hard limits here, which only an app
 // update can change. Nothing is ever downloaded or removed without a click.

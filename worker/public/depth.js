@@ -1,6 +1,6 @@
 // Depth Anything V2 small for the pool (plans/pool-3d.md section 12): a picture
 // in, a grey depth map out (near = white). Pure functions, no browser or Node
-// APIs, so the tab (join.html) and the test (apps/pool/test/depth-test.mjs) run
+// APIs, so the tab (join.html) and the test (worker/test/depth-test.mjs) run
 // the same code. The caller resizes the picture to targetSize() and runs the
 // ONNX session; this file does the numbers before and after.
 //
@@ -8,7 +8,7 @@
 // fit to 518 keeping the aspect ratio, sides a multiple of 14, scale to 0..1,
 // normalise with ImageNet's mean and std. The model answers relative inverse
 // depth (bigger is nearer), which is min-max scaled to 0..255 here, as
-// evals/estonian-visuals/drift-room.mjs writes its depth maps.
+// visualia-research/evals/estonian-visuals/drift-room.mjs writes its depth maps.
 
 export const SIDE = 518;
 export const MULTIPLE = 14;

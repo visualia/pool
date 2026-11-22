@@ -58,7 +58,7 @@
   "stores-remove": "To remove the models:",
   "remove": "Remove the models",
   "stores-block": "Whoever runs the pool can revoke your key, and IT can block <code>pool.visualia.space</code>.",
-  "code": "The code is in the Visualia repository, <code>apps/pool</code>.",
+  "code": "The code is open: <a href=\"https://github.com/visualia/pool\">github.com/visualia/pool</a>.",
   "sign-out": "Sign out",
   "no-webgpu": "This browser can’t join: it needs WebGPU. Use Chrome or Edge.",
   "not-in-pool": "Not in the pool",

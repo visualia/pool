@@ -107,7 +107,7 @@ export default {
 // ---- updates for the Visualia Pool app (plans/worker-app.md step 4) ------------------
 // R2 bucket APP holds `latest.json` (Tauri's manifest: version, notes, pub_date,
 // platforms {"darwin-aarch64": {url, signature}}) and `files/<name>`, written by
-// apps/pool-app/publish-update.mjs. The app checks the signature against its
+// app/publish-update.mjs. The app checks the signature against its
 // own key, so these routes need no sign-in: they serve what anyone may download.
 //   GET /app/update/<target>/<arch>/<current version>  200 + manifest, or 204
 //   GET /app/files/<name>                               the update itself
@@ -215,31 +215,7 @@ async function session(request, env) {
 
 // ---- the Pool: one per school ---------------------------------------------------
 //
-// Protocol (JSON text frames; "ping" -> "pong" is answered without waking the object):
-//   tab  -> pool  { type: 'hello', models: ['qwen2.5-1.5b'] }        once its model is loaded
-//   pool -> tab   { type: 'welcome', person, workers }
-//   pool -> tab   { type: 'job', id, model, messages, max_tokens, temperature, top_p, stop, seed,
-//                   response_format: { type: 'json_object', schema: '<JSON schema as a string>' } }
-//   tab  -> pool  { type: 'delta', id, content }                      per token (or a few)
-//   tab  -> pool  { type: 'done', id, usage: { prompt_tokens, completion_tokens }, finish_reason }
-//                 a worker that measures energy (the node worker, macmon) adds to usage:
-//                 energy_j, energy_net_j, sys_energy_j (joules), energy_source ('macmon')
-//   tab  -> pool  { type: 'error', id, message }
-//   pool -> tab   { type: 'cancel', id }                              the asker left, or too slow
-//   decisions (node workers only):
-//   pool -> node  { type: 'job', id, kind: 'decide', model, state, questions }
-//   node -> pool  { type: 'done', id, answers, usage }                  or { type: 'error', id, message }
-//   upscaling (node workers, and tabs for upscale-fast):
-//   pool -> node  { type: 'job', id, kind: 'upscale', model, image }     image: base64 PNG/JPEG/WebP
-//   node -> pool  { type: 'done', id, image, width, height, usage }      image: base64 JPEG, 4x
-//   pictures from a prompt (node workers only):
-//   pool -> node  { type: 'job', id, kind: 'image', model, prompt, width, height, seed, negative? }
-//   pool -> node  { type: 'job', id, kind: 'cutout', model, image }        image: base64 PNG/JPEG
-//   node -> pool  { type: 'done', id, image, width, height, usage }      image: base64 PNG with alpha
-//   node -> pool  { type: 'done', id, image, width, height, usage }      image: base64 PNG (or JPEG)
-//   depth maps (tabs and nodes):
-//   pool -> tab   { type: 'job', id, kind: 'depth', model, image }       image: base64 PNG/JPEG
-//   tab  -> pool  { type: 'done', id, image, width, height, usage }      image: base64 grey PNG, near = white
+// The frames, both directions: protocol/frames.md (keep it in step with this file).
 //
 // To the gateway, a job is an OpenAI-style event stream. If the worker leaves,
 // errs or stalls, the stream ends with { pool_error } instead of [DONE], so the

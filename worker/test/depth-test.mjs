@@ -1,7 +1,7 @@
-// node apps/pool/test/depth-test.mjs
+// node worker/test/depth-test.mjs
 //
 // The tab's depth code (public/depth.js) against the depth maps
-// evals/estonian-visuals/drift-room.mjs made with transformers.js from the same
+// visualia-research/evals/estonian-visuals/drift-room.mjs made with transformers.js from the same
 // model file. Same file, same steps, so the maps should agree almost exactly;
 // the only difference is the resize (sharp's cubic here, transformers.js's
 // bicubic there). The model run is skipped, with a note, when the file or the
@@ -16,9 +16,11 @@ import * as ort from 'onnxruntime-web';
 import { targetSize, toInput, toGrey, SIDE } from '../public/depth.js';
 import { MODELS } from '../src/models.js';
 
-const root = fileURLToPath(new URL('../../../', import.meta.url));
-const MODEL = process.env.DEPTH_MODEL ?? `${root}evals/estonian-visuals/out/neighbours/models/onnx-community/depth-anything-v2-small/onnx/model_quantized.onnx`;
-const LAND = `${root}evals/estonian-visuals/out/drift-room/land/nano-banana-2-lite/`;
+const root = fileURLToPath(new URL('../../', import.meta.url));
+// The study's model and pictures, in the research checkout beside this one (or DEPTH_DATA).
+const data = process.env.DEPTH_DATA ?? `${root}../visualia-research/evals/estonian-visuals/out/`;
+const MODEL = process.env.DEPTH_MODEL ?? `${data}neighbours/models/onnx-community/depth-anything-v2-small/onnx/model_quantized.onnx`;
+const LAND = `${data}drift-room/land/nano-banana-2-lite/`;
 const PICTURES = ['bog', 'birch', 'alvar', 'ashhill'];
 
 // ---- sizes: the DPT rule ----

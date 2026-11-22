@@ -1,4 +1,4 @@
-// node apps/pool/test/join-depth-test.mjs [--headed]
+// node worker/test/join-depth-test.mjs [--headed]
 //
 // The pool page (public/join.html) as a depth worker, in Chrome, with the pool
 // itself played by this script: Playwright answers the page's requests (the
@@ -17,26 +17,28 @@ import sharp from 'sharp';
 import { chromium } from 'playwright';
 import { MODELS } from '../src/models.js';
 
-const root = fileURLToPath(new URL('../../../', import.meta.url));
-const pub = `${root}apps/pool/public/`;
-const MODEL = process.env.DEPTH_MODEL ?? `${root}evals/estonian-visuals/out/neighbours/models/onnx-community/depth-anything-v2-small/onnx/model_quantized.onnx`;
-const PICTURE = `${root}evals/estonian-visuals/out/drift-room/land/nano-banana-2-lite/bog.png`;
+const root = fileURLToPath(new URL('../../', import.meta.url));
+// The study's model and pictures, in the research checkout beside this one (or DEPTH_DATA).
+const data = process.env.DEPTH_DATA ?? `${root}../visualia-research/evals/estonian-visuals/out/`;
+const pub = `${root}worker/public/`;
+const MODEL = process.env.DEPTH_MODEL ?? `${data}neighbours/models/onnx-community/depth-anything-v2-small/onnx/model_quantized.onnx`;
+const PICTURE = `${data}drift-room/land/nano-banana-2-lite/bog.png`;
 const ORIGIN = 'https://pool.visualia.space';
 if (!existsSync(MODEL) || !existsSync(PICTURE)) {
   console.log('join-depth-test: skipped (model or picture not here)');
   process.exit(0);
 }
 const entry = MODELS.find((m) => m.depth);
-const src = readFileSync(`${root}apps/pool/src/index.js`, 'utf8');
+const src = readFileSync(`${root}worker/src/index.js`, 'utf8');
 const CSP = [...src.match(/const CSP = \[([\s\S]*?)\]\.join/)[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]).join('; ');
 
 // What the pool would serve: the page with its CSP, the files from public/, the
 // copies the build makes (text.js, the style sheets), and the app routes.
 const files = {
   '/join': [`${pub}join.html`, 'text/html'],
-  '/text.js': [`${root}packages/text/text.js`, 'text/javascript'],
-  '/visualia.css': [`${root}packages/style/visualia.css`, 'text/css'],
-  '/pool.css': [`${root}packages/style/pool.css`, 'text/css'],
+  '/text.js': [`${root}vendor/text.js`, 'text/javascript'],
+  '/visualia.css': [`${root}vendor/visualia.css`, 'text/css'],
+  '/pool.css': [`${root}vendor/pool.css`, 'text/css'],
 };
 const type = (p) => (p.endsWith('.js') ? 'text/javascript' : p.endsWith('.json') ? 'application/json' : p.endsWith('.css') ? 'text/css' : 'application/octet-stream');
 

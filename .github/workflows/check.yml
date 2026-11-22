@@ -1,0 +1,27 @@
+# Every push and PR: the app's core (no I/O) tested and built as WebAssembly, and
+# the pool's text checked. No secrets; releases are a separate workflow (not yet).
+name: check
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  core:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v5
+      - run: rustup target add wasm32-unknown-unknown
+      - run: cargo test -p pool-core --no-default-features
+      - run: cargo build -p pool-core --no-default-features --target wasm32-unknown-unknown
+  worker:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: node vendor/check-text.mjs worker/public worker/public/join.html
+      - run: node vendor/check-text.mjs app/ui app/ui/index.html app/ui/app.js
+      - run: node --check worker/src/index.js
