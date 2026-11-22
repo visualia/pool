@@ -9,6 +9,13 @@ license = "MIT"
 name = "visualia-pool"
 path = "src/main.rs"
 
+# The course key: the macOS keychain, the Windows Credential Manager.
+[target.'cfg(target_os = "macos")'.dependencies]
+keyring = { version = "3", features = ["apple-native"] }
+
+[target.'cfg(windows)'.dependencies]
+keyring = { version = "3", features = ["windows-native"] }
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
@@ -17,7 +24,6 @@ pool-core = { path = "../pool-core" }
 tauri = { version = "2", features = [] }
 tokio = { version = "1", features = ["sync", "time", "signal"] }
 serde_json = "1"
-keyring = { version = "3", features = ["apple-native"] }
 tauri-plugin-opener = "2"
 tauri-plugin-autostart = "2"
 # Updates: from pool.visualia.space, signed with our own key, on the system's TLS like pool-core.

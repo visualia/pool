@@ -25,3 +25,21 @@ jobs:
       - run: node vendor/check-text.mjs worker/public worker/public/join.html
       - run: node vendor/check-text.mjs app/ui app/ui/index.html app/ui/app.js
       - run: node --check worker/src/index.js
+  # Windows (EKA's RTX workstations): the program and the app build, and the program
+  # is kept for a test on a school computer. Not signed; not a release.
+  windows:
+    runs-on: windows-2025
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v5
+      - run: cargo build --release -p pool-core
+      - run: cargo build --release -p visualia-pool
+      - uses: actions/upload-artifact@v4
+        with:
+          name: visualia-pool-windows
+          path: |
+            app/target/release/visualia-pool-cli.exe
+            app/target/release/visualia-pool.exe
+          retention-days: 14
