@@ -16,8 +16,11 @@ bug.
 | app | `https://pool.visualia.space/app/models`, `/app/update/...`, `/app/files/...` | the model list and updates, no sign-in |
 | app, CLI | `http://127.0.0.1:11434` | Ollama on the same computer |
 | tab | `cdn.jsdelivr.net` | WebLLM 0.2.86 and ONNX Runtime 1.31.1, pinned (`worker/public/join.html`) |
-| tab | where WebLLM's model list points | the chat model's files, on Join |
+| tab | `huggingface.co`, `*.hf.co` | the chat model's files, downloaded once, on Join |
+| tab | `raw.githubusercontent.com` | the model's graphics code (`mlc-ai/binary-mlc-llm-libs`) |
 | tab | `https://pool.visualia.space/app/files/...` | the depth model, checked by SHA-256 |
+
+The join page's Content Security Policy (`worker/src/index.js`) blocks every other address for the tab.
 
 The pool itself talks to nothing else on the internet. The platform's gateway reaches it through a Cloudflare service
 binding (`ForGateway`), and the pool asks the gateway who a course key belongs to (`ForPool`). Neither is reachable
