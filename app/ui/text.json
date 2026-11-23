@@ -37,6 +37,7 @@
   "col-seconds": "Seconds",
   "col-wh": "Wh",
   "job-decision": "decision",
+  "job-picture": "picture",
   "job-stopped": "stopped",
   "job-failed": "failed",
   "privacy": "It connects only to pool.visualia.space. Only the model, time and energy of the work are recorded, never what was asked or answered.",

@@ -204,7 +204,7 @@ function onEvent(e) {
     // The tokens column says what came of it when there are no tokens to count.
     const tokens = e.failed
       ? e.failed === 'cancelled' ? t('job-stopped') : t('job-failed')
-      : e.kind === 'decide' ? t('job-decision') : num(e.tokens);
+      : e.kind === 'decide' ? t('job-decision') : e.tokens == null ? t('job-picture') : num(e.tokens); // upscale, image, cutout: no tokens
     const energy = e.failed || e.energy_j == null ? '' : num(wh(e.energy_j));
     if (!e.failed && e.energy_j != null) addToday(e.energy_j);
     for (const [text, cls] of [[time(e.t), 'clock'], [model, ''], [tokens, 'n'], [oneDecimal.format(e.seconds), 'n'], [energy, 'n']]) { const td = document.createElement('td'); td.textContent = text; td.className = cls; tr.append(td); }
