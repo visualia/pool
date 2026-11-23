@@ -10,7 +10,7 @@ This repository has everything that runs on a computer in the pool, and the one 
 protocol/frames.md   what goes over the wire, both directions. Start here
 app/                 the Visualia Pool app (Tauri) and the visualia-pool-cli program (Rust), README.md
 worker/              pool.visualia.space: the join page (a browser tab can join too), sign-in, one Pool per school, README.md
-vendor/              the style sheet and text helper, copied from visualia/visualia (vendor/SOURCE says which commit)
+vendor/              the style sheet and text helper
 ```
 
 The rest of Visualia (the studio, the gateway that every model call goes through, the plans) is in
