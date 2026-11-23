@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/logo-dark.svg">
+  <img src=".github/logo.svg" alt="Visualia" width="96">
+</picture>
+
 # Visualia Pool
 
 A school shares its own computers for AI work. A computer joins the pool, does work for everyone in the school's pool,
@@ -13,16 +18,17 @@ like `plans/pool.md` in a comment here means that repository.
 | [`protocol/frames.md`](protocol/frames.md) | what goes over the wire, both directions. **Start here** |
 | [`app/`](app/README.md) | the Visualia Pool app and the `visualia-pool-cli` program (Rust, macOS and Windows) |
 | [`worker/`](worker/README.md) | `pool.visualia.space`: the join page (a browser tab can join too), sign-in, one pool per school |
-| `vendor/` | the style sheet and text helper |
+| `vendor/` | the style sheet and text helper, copied from visualia's `packages/` by `node vendor/sync.mjs`. Never edited here |
 
 ## For IT
 
 1. [`protocol/frames.md`](protocol/frames.md): every address, the sign-in, every frame.
 2. [`app/README.md`](app/README.md): what a computer in the pool does, never does, and how to stop it.
-3. `app/pool-core/src/`: the code that runs. `native.rs` does all the talking, `core.rs` holds the decisions and does
-   no I/O.
-4. `app/src-tauri/capabilities/default.json` (what the window may ask for) and `app/src-tauri/tauri.conf.json` (its
-   Content Security Policy and update key).
+3. [`app/pool-core/src/`](app/pool-core/src/): the code that runs. [`native.rs`](app/pool-core/src/native.rs) does
+   all the input and output: the connection to pool.visualia.space, the calls to Ollama on this computer, and the
+   model files it downloads. [`core.rs`](app/pool-core/src/core.rs) makes the decisions and does no input or output.
+4. [`app/src-tauri/capabilities/default.json`](app/src-tauri/capabilities/default.json) (what the window may ask for)
+   and [`app/src-tauri/tauri.conf.json`](app/src-tauri/tauri.conf.json) (its Content Security Policy and update key).
 
 ## Run
 
@@ -34,7 +40,6 @@ Needs Node 22 or newer. The app and the program also need Rust (`rustup`) and Ol
 | The app | `npm install`, then `cd app && npm run dev` (debug window) or `npm run build` |
 | The pool server, locally | `npm run dev` in visualia/visualia (it starts this one too); see [`worker/README.md`](worker/README.md) |
 | Tests | `cd app && cargo test -p pool-core --no-default-features`; `npm test -w worker` |
-| After visualia's `packages/` change | `node vendor/sync.mjs` |
 
 ## Builds
 
